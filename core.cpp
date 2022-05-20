@@ -9,8 +9,19 @@
 
 using namespace std;
 
+//double FRIS::fun(int x, int x1, int u){ //функция конкурентного сходства
+double FRIS::fun(size_t x, size_t x1, size_t u){
+      assert(x<h||x1<h||u<h);
+      double f = ((*m_diss)(u,x) - (*m_diss)(u,x1))/((*m_diss)(u,x) + (*m_diss)(u,x1));
+      if ((f>0)&(f<1)){}
+      if ((f<0)&(f>-1)){}
+      if (f==0){}
+      if (f==1){}
+      if (f==-1){}
+      return f;
+}
 
-double FRIS::diss(vector<double> o1, vector<double> o2) {
+double FRIS::diss(vector<double> o1, vector<double> o2) { //вычисление дистанции между точками
     double s=0;
     for (size_t col=0; col<o1.size(); col++) {
         double d = (o1[col]-o2[col]);
@@ -36,12 +47,16 @@ bool FRIS::calcdiss() {
                row1.push_back(m_frame[c][row]);
                row2.push_back(m_frame[c][col]);
             }
-            double d = diss(row1,row2);
+            double d = diss(row1,row2);       // заполнение матрицы
             //m_diss->mData[row*m_diss->mCols+col] = d;
             (*m_diss)(row,col)=diss(row1,row2);
         }
     }
     m_diss->print(cout);
+    setlocale(LC_ALL,"Russian");
+    wcout <<"Сообщение"<<endl;
+    cout << "f=";
+    cout<<fun(2,4,6)<<endl;
     // comment
     return true;
 }

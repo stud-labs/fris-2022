@@ -27,6 +27,8 @@ public:
     bool outResult(ostream& stream);
     bool calculate();
     void printFrame(ostream& out);
+    double fun(size_t x,size_t x1,size_t u);
+    //double fun(int x,int x1,int u);
 protected:
     bool calcdiss();
 private:
@@ -37,6 +39,7 @@ public:
     ~FRIS();
 private:
     size_t h=0, w=0;
+    // double x=0,x1=0,u=0;
 private:
     // By definition it is Euler distance
     virtual double diss(vector<double> o1, vector<double> o2);
