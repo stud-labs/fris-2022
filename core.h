@@ -14,7 +14,7 @@ public:
     double operator()(size_t i, size_t j) const;
     void print(ostream& o);
 
-private:
+public:
     size_t mRows;
     size_t mCols;
     vector<double> mData;

@@ -16,42 +16,33 @@ double FRIS::diss(vector<double> o1, vector<double> o2) {
         double d = (o1[col]-o2[col]);
         s+=d*d;
     }
-    m_diss->print(cout);
     return sqrt(s);
 }
 
 bool FRIS::calcdiss() {
     assert(w>0);
+    cout << "h:";
     cout<<h<<endl;
+    cout << "w:";
     cout<<w<<endl;
-   // cout<<v.size();
-      m_diss = new Matrix(h,h);
-   /* for (size_t o1=0;o1<h; o1++) {
-        for (size_t o2=0;o2<h; o2++) {
+    // cout<<v.size();
+    m_diss = new Matrix(h,h);
+
+    for (size_t row=0;row<h; row++) {         //по ряду
+        for (size_t col=0;col<h; col++) {     //по колонке
             vector<double> row1;
             vector<double> row2;
-            for (size_t col=0;col<w;col++) {
-                row1.push_back(m_frame[col][o1]);
-                row2.push_back(m_frame[col][o1]);
+            for (size_t c=0;c<w;c++) {
+               row1.push_back(m_frame[c][row]);
+               row2.push_back(m_frame[c][col]);
             }
-            (*m_diss)(o1,o2)=diss(row1,row2);
+            double d = diss(row1,row2);
+            //m_diss->mData[row*m_diss->mCols+col] = d;
+            (*m_diss)(row,col)=diss(row1,row2);
         }
     }
     m_diss->print(cout);
-    return true; */
-
-    for (size_t row=0;row<h; row++) { //по ряду
-        for (size_t col=0;col<h; col++) { //по колонке
-            //vector<double> row1;
-            //vector<double> row2;
-            //for (size_t col=1;col<w+1;col++) {
-              // row1.push_back(m_frame[col][row]);
-              // row2.push_back(m_frame[col][row]);}
-              }
-              }
-
-        m_diss->print(cout);
-        return true;
+    return true;
 }
 
 FRIS::~FRIS() {
@@ -89,26 +80,29 @@ bool FRIS::loadData(string filename) {
                 if (col<m_frame.size()) {
                     vector<double>& v = m_frame[col];
                     v.push_back(num);
+                    i=v.size();
                 }  else {
                     vector<double> v;
                     m_frame.push_back(v);
                     v.push_back(num);
+                    //i=v.size();
                 }
-
                 col++;
+                //i++;
             }
         }
         h=i;
-        cout <<h <<endl;
+        assert(h>0);
     }
-    //h=v.size();
     in.close();
     w=m_frame.size();
+
     return true;
 };
 
 
 void FRIS::printFrame(ostream& out) {
+    out << "file open:" << endl;
     size_t i = 0;
     while(true) {
         for (vector<double> v: m_frame) {
@@ -119,8 +113,8 @@ void FRIS::printFrame(ostream& out) {
             out<<endl;
         i++;
     }
-    h=v.size();
-    cout<<h<<endl;
+    h=i;
+    //out<<i<<endl;
     end:;
 }
 
