@@ -13,6 +13,8 @@ int main()
     cout << "Calculating\n";
     f.calculate();
     cout << "Print result\n";
+    cout << "\nfrisClus:" <<f.frisClus(1,0,14)<<endl;
+    f.test1();
     f.outResult(cout);
 
     return 0;
