@@ -125,8 +125,6 @@ bool FRIS::loadData(string filename) {
     // istream inp(filename);
 
     std::string line;
-    // std::ifstream in("C:\\fris\\fristdr\\R\\new.csv");
-    // std::ifstream in("C:\\fris\\fristdr\\R\\data4.txt");
     ifstream in(filename);
     if (in.is_open()){
         size_t i=0;

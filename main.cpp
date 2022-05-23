@@ -1,13 +1,17 @@
 #include <iostream>
 #include "core.h"
 
+// #define FILENAME "C:\\fris\\fristdr\\R\\data4.txt"
+#define FILENAME "./data4.txt"
+
 using namespace std;
+
 
 int main()
 {
     FRIS f;
     cout << "Loading data\n";
-    f.loadData("./data4.txt");
+    f.loadData(FILENAME);
     cout << "Frame loaded\n";
     f.printFrame(cout);
     cout << "Calculating\n";
