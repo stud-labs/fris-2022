@@ -1,4 +1,4 @@
-.PHONY: compile run
+.PHONY: compile run debug
 
 CFLAGS = -g -O0
 LDFLAGS = -lm
@@ -13,3 +13,6 @@ fris: $(SRC) $(HDR)
 
 run: compile
 	./fris
+
+debug: compile
+	gdb ./fris

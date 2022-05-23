@@ -96,9 +96,13 @@ ssize_t FRIS::findNearest(ssize_t c, size_t u) {
 
 
 double FRIS::frisClus(ssize_t c1, ssize_t c2, size_t u) {
-    ssize_t x1 = findNearest(c1, u);
-    ssize_t x2 = findNearest(c2, u);
-    return fun(x1,x2,u);
+  assert(u>=0);
+  assert(u<=h);
+  ssize_t x1 = findNearest(c1, u);
+  ssize_t x2 = findNearest(c2, u);
+  cout << "1c["<<x1<<"]="<<m_class[x1]<<"="<<c1<<endl;
+  cout << "2c["<<x2<<"]="<<m_class[x2]<<"="<<c2<<endl;
+  return fun(x1,x2,u);
 }
 
 bool FRIS::calculate() {
@@ -109,7 +113,7 @@ bool FRIS::calculate() {
 
 void FRIS::test1() {
     setlocale(LC_ALL,"Russian");
-    wcout <<"Ñîîáùåíèå"<<endl;
+    wcout <<"Result"<<endl;
     cout << "f=";
     cout<<fun(3,4,2)<<endl;
 }
@@ -122,7 +126,8 @@ bool FRIS::loadData(string filename) {
 
     std::string line;
     // std::ifstream in("C:\\fris\\fristdr\\R\\new.csv");
-    std::ifstream in("C:\\fris\\fristdr\\R\\data4.txt");
+    // std::ifstream in("C:\\fris\\fristdr\\R\\data4.txt");
+    ifstream in(filename);
     if (in.is_open()){
         size_t i=0;
         while (getline(in, line)) {
@@ -180,7 +185,7 @@ void FRIS::printFrame(ostream& out) {
                 if (v.size()<=i) goto end;
                 double d = v[i];
                 out<<d<<"\t";
-            }
+        }
             out<<endl;
         i++;
     }
@@ -203,10 +208,11 @@ Matrix::Matrix(size_t rows, size_t cols)
 
 double& Matrix::operator()(size_t i, size_t j) {
     assert(i>=0);
+    // cout << "\nMATR:" << mCols << " " << mRows << endl;
+    // cout << "    :" << i << " " << j << endl;
     assert(i<mRows);
     assert(j>=0);
     assert(j<mCols);
-    cout << "MATR:" << mCols << " " << mRows << endl;
     return mData[i * mCols + j];
 }
 
