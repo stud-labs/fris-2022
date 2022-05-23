@@ -29,11 +29,14 @@ public:
     void printFrame(ostream& out);
     double fun(size_t x,size_t x1,size_t u);
     //double fun(int x,int x1,int u);
+    double frisClus(ssize_t c1, ssize_t c2, size_t u) ;
 protected:
     bool calcdiss();
+    ssize_t findNearest(ssize_t c, size_t u);
 private:
     // vector<double> m_v;
     vector<vector<double>> m_frame;
+    vector<ssize_t> m_class;
     Matrix * m_diss = nullptr;
 public:
     ~FRIS();
@@ -43,6 +46,11 @@ private:
 private:
     // By definition it is Euler distance
     virtual double diss(vector<double> o1, vector<double> o2);
+
+
+
+public:
+    void test1();
 };
 
 #endif // __CORE_H__

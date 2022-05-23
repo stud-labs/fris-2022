@@ -6,18 +6,28 @@
 #include <vector>
 #include <assert.h>
 #include <math.h>
+#include <stdlib.h>
 
 using namespace std;
 
 //double FRIS::fun(int x, int x1, int u){ //функция конкурентного сходства
-double FRIS::fun(size_t x, size_t x1, size_t u){
-      assert(x<h||x1<h||u<h);
-      double f = ((*m_diss)(u,x) - (*m_diss)(u,x1))/((*m_diss)(u,x) + (*m_diss)(u,x1));
-      if ((f>0)&(f<1)){}
-      if ((f<0)&(f>-1)){}
-      if (f==0){}
-      if (f==1){}
-      if (f==-1){}
+double FRIS::fun(size_t x1, size_t x2, size_t u){
+      // assert(x<h||x1<h||u<h);
+      // double r1=1000000;
+      //double r2=1;
+/*      for (size_t row=0;row<h; row++){               //по ряду
+       for (size_t col=0;col<h; col++){              //по колонке
+         if(((*m_diss)(u,col)<r1)&(col!=u)){
+            r1 = (*m_diss)(u,col);
+         }
+       }
+      }
+      cout <<"r1:"<<r1<<endl;
+  */
+      if (x1 == x2) return 0.0;
+
+      double f = ((*m_diss)(u,x1) - (*m_diss)(u,x2))/((*m_diss)(u,x1) + (*m_diss)(u,x2));
+   //   double f = ((r1 - (*m_diss)(u,x1))/(r1 + (*m_diss)(u,x1)));
       return f;
 }
 
@@ -52,11 +62,7 @@ bool FRIS::calcdiss() {
             (*m_diss)(row,col)=diss(row1,row2);
         }
     }
-    m_diss->print(cout);
-    setlocale(LC_ALL,"Russian");
-    wcout <<"Сообщение"<<endl;
-    cout << "f=";
-    cout<<fun(2,4,6)<<endl;
+    // m_diss->print(cout);
     // comment
     return true;
 }
@@ -65,11 +71,48 @@ FRIS::~FRIS() {
     if (m_diss != nullptr) delete m_diss;
 }
 
+ssize_t FRIS::findNearest(ssize_t c, size_t u) {
+    if (c<0) return c;
+    ssize_t minIndex = -2;
+    double minDist;
+    bool first = true;
+    for (size_t row=0; row<h; row++) {
+        if (m_class[row]==c) {
+            double d = (*m_diss)(u, row);
+            if (first) {
+                minDist = d;
+                minIndex = row;
+                first = false;
+            } else {
+                if (minDist > d) {
+                    minDist = d;
+                    minIndex = row;
+                }
+            }
+        }
+    };
+    return minIndex;
+}
+
+
+double FRIS::frisClus(ssize_t c1, ssize_t c2, size_t u) {
+    ssize_t x1 = findNearest(c1, u);
+    ssize_t x2 = findNearest(c2, u);
+    return fun(x1,x2,u);
+}
+
 bool FRIS::calculate() {
     if (!calcdiss()) return false;
     return true;
 };
 
+
+void FRIS::test1() {
+    setlocale(LC_ALL,"Russian");
+    wcout <<"Сообщение"<<endl;
+    cout << "f=";
+    cout<<fun(3,4,2)<<endl;
+}
 
 bool FRIS::loadData(string filename) {
     // Read tabular data from file.
@@ -78,30 +121,42 @@ bool FRIS::loadData(string filename) {
     // istream inp(filename);
 
     std::string line;
-    std::ifstream in("C:\\fris\\fristdr\\R\\new.csv");
+    // std::ifstream in("C:\\fris\\fristdr\\R\\new.csv");
+    std::ifstream in("C:\\fris\\fristdr\\R\\data4.txt");
     if (in.is_open()){
         size_t i=0;
         while (getline(in, line)) {
-            // std::cout << line << std::endl;
+            std::cout << "DBG:" << line << std::endl;
             istringstream sti(line);
             size_t col = 0;
-            while (true) {
+            while (true){
                 if (sti.eof()) break;
                 double num;
-                sti>>num;
+                ssize_t cls;
+                if (col == 0) {
+                    sti>>cls;
+                } else {
+                    sti>>num;
+                }
                 // cout<<col<<"-"<<num<<"\n";
                 if(sti.fail()){
                     break;
                 }
-                if (col<m_frame.size()) {
-                    vector<double>& v = m_frame[col];
-                    v.push_back(num);
-                    i=v.size();
-                }  else {
-                    vector<double> v;
-                    m_frame.push_back(v);
-                    v.push_back(num);
-                    //i=v.size();
+                if (col == 0) {
+                    m_class.push_back(cls);
+                } else {
+                    assert(col>0);
+                    size_t col1=col-1;
+                    if (col1<m_frame.size()) {
+                        vector<double>& v = m_frame[col1];
+                        v.push_back(num);
+                        i=v.size();
+                    }  else {
+                        vector<double> v;
+                        v.push_back(num);
+                        m_frame.push_back(v);
+                        //i=v.size();
+                    }
                 }
                 col++;
                 //i++;
@@ -116,11 +171,11 @@ bool FRIS::loadData(string filename) {
     return true;
 };
 
-
 void FRIS::printFrame(ostream& out) {
     out << "file open:" << endl;
     size_t i = 0;
     while(true) {
+        out<<m_class[i]<<"\t";
         for (vector<double> v: m_frame) {
                 if (v.size()<=i) goto end;
                 double d = v[i];
@@ -133,8 +188,6 @@ void FRIS::printFrame(ostream& out) {
     //out<<i<<endl;
     end:;
 }
-
-
 
 bool FRIS::outResult(ostream& stream) {
     stream<<"Hello world"<<endl;
@@ -149,10 +202,19 @@ Matrix::Matrix(size_t rows, size_t cols)
 }
 
 double& Matrix::operator()(size_t i, size_t j) {
+    assert(i>=0);
+    assert(i<mRows);
+    assert(j>=0);
+    assert(j<mCols);
+    cout << "MATR:" << mCols << " " << mRows << endl;
     return mData[i * mCols + j];
 }
 
 double Matrix::operator()(size_t i, size_t j) const {
+    assert(i>=0);
+    assert(i<mRows);
+    assert(j>=0);
+    assert(j<mCols);
     return mData[i * mCols + j];
 }
 
