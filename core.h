@@ -34,7 +34,7 @@ public:
 
 protected:
     bool calcdiss();
-    ssize_t get(size_t a, size_t b, size_t u, bool minimal=true) {
+    ssize_t get(size_t a, size_t b, size_t u, bool minimal=true);
 
     ssize_t findNearest(size_t c, size_t u, bool inc=true, bool ext = false, bool unc = false);
     ssize_t stolp(ssize_t c);
