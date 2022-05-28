@@ -113,7 +113,6 @@ bool FRIS::calculate() {
 
 void FRIS::test1() {
     setlocale(LC_ALL,"Russian");
-    wcout <<"Сообщение"<<endl;
     wcout <<"Result"<<endl;
     cout << "f=";
     cout<<fun(3,4,2)<<endl;
