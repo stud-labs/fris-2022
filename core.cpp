@@ -10,12 +10,10 @@
 
 using namespace std;
 
-//double FRIS::fun(int x, int x1, int u){ //функция конкурентного сходства
-double FRIS::fun(size_t x1, size_t x2, size_t u){
-      // assert(x<h||x1<h||u<h);
+double FRIS::fun(size_t x1, size_t x2, size_t u){ //функция конкурентного сходства
+      // assert(x1<h);assert(x1<h);assert(u<h);
       // double r1=1000000;
-      //double r2=1;
-/*      for (size_t row=0;row<h; row++){              //по ряду
+      /* for (size_t row=0;row<h; row++){            //по ряду
        for (size_t col=0;col<h; col++){              //по колонке
          if(((*m_diss)(u,col)<r1)&(col!=u)){
             r1 = (*m_diss)(u,col);
@@ -23,11 +21,16 @@ double FRIS::fun(size_t x1, size_t x2, size_t u){
        }
       }
       cout <<"r1:"<<r1<<endl;
-  */
+      */
       if (x1 == x2) return 0.0;
-
       double f = ((*m_diss)(u,x1) - (*m_diss)(u,x2))/((*m_diss)(u,x1) + (*m_diss)(u,x2));
-   //   double f = ((r1 - (*m_diss)(u,x1))/(r1 + (*m_diss)(u,x1)));
+      // double f = ((r1 - (*m_diss)(u,x1))/(r1 + (*m_diss)(u,x1)));
+      return f;
+}
+
+double FRIS::rFun(size_t x1, size_t u){ // функция конкурентного сходства по неклассифицированной выборке
+      double r = 1000000;               // расстояние до виртуального образа
+      double f = ((r - (*m_diss)(u,x1))/(r + (*m_diss)(u,x1)));
       return f;
 }
 
@@ -62,7 +65,7 @@ bool FRIS::calcdiss() {
             (*m_diss)(row,col)=diss(row1,row2);
         }
     }
-    // m_diss->print(cout);
+     m_diss->print(cout);
     // comment
     return true;
 }
@@ -71,38 +74,141 @@ FRIS::~FRIS() {
     if (m_diss != nullptr) delete m_diss;
 }
 
-ssize_t FRIS::findNearest(ssize_t c, size_t u) {
-    if (c<0) return c;
+struct search_t{
     ssize_t minIndex = -2;
     double minDist;
+    void update(double d, size_t row);
+
+private:
     bool first = true;
+};
+
+void search_t::update(double d, size_t row) {
+    if (first) {
+        minDist = d;
+        minIndex = row;
+        first = false;
+    } else {
+        if (minDist > d) {
+            minDist = d;
+            minIndex = row;
+        }
+    }
+}
+
+
+
+ssize_t FRIS::findNearest(size_t c, size_t u, bool inc, bool ext, bool unc) {
+    // c>=0 ищет элемент с минимальной дистанцией до u в классе с (not=false, unc=false) ИЛИ
+    // not = true  ищет элемент везде, но не в с
+    // unc = true ищет в неклассифицированной выборке
+    // int t = 0; // считает кол-во элементов в классе
+    search_t s;
     for (size_t row=0; row<h; row++) {
-        if (m_class[row]==c) {
-            double d = (*m_diss)(u, row);
-            if (first) {
-                minDist = d;
-                minIndex = row;
-                first = false;
-            } else {
-                if (minDist > d) {
-                    minDist = d;
-                    minIndex = row;
-                }
+        double d = (*m_diss)(u, row);
+        if (inc) {
+            if (m_class[row]==c) {
+                s.update(d, row);
+            };
+        }
+        if (ext) {
+            if (m_class[row]!=c and m_class[row]>=0) {
+                s.update(d, row);
+            }
+        }
+        if (unc) {
+            if (m_class[row]<0) {
+                s.update(d, row);
             }
         }
     };
-    return minIndex;
+    //cout<<"\nt for "<<c<<" = "<<t<<endl;
+    return s.minIndex; // возвращает индекс элемента
 }
-
 
 double FRIS::frisClus(ssize_t c1, ssize_t c2, size_t u) {
   assert(u>=0);
   assert(u<=h);
-  ssize_t x1 = findNearest(c1,u);
-  ssize_t x2 = findNearest(c2,u);
-  // cout <<"1c["<<x1<<"]="<<m_class[x1]<<"="<<c1<<endl;
-  // cout <<"2c["<<x2<<"]="<<m_class[x2]<<"="<<c2<<endl;
-    return fun(x1,x2,u);
+  ssize_t x1 = findNearest(c1, u);
+  ssize_t x2 = findNearest(c2, u);
+  cout << "1c["<<x1<<"]="<<m_class[x1]<<"="<<c1<<endl;
+  cout << "2c["<<x2<<"]="<<m_class[x2]<<"="<<c2<<endl;
+  // double r1 = min((*m_diss)(x1,u),(*m_diss)(x2,u)); // r1 для алгоритма
+  // cout << "min diss r1 ="<<r1<<endl;
+  // cout << "f(x1,x2,u)=";
+  return fun(x1,x2,u);
+}
+
+ssize_t FRIS::get(size_t a, size_t b, size_t u, bool minimal) {
+    double da,db;
+    da = (*m_diss)(a, u);
+    db = (*m_diss)(b, u);
+    if (minimal) {
+        return da<db ? a:b;
+    } else {
+        return da<db ? b:a;
+    }
+}
+
+double FRIS::mean(ssize_t c, size_t u){ // среднее значение FRIS
+    double s;
+    double f;
+    int t = 0;
+    bool first = true;
+    size_t x1 =-1, x2 = -1;
+    ssize_t c2=-2;  // Other Class not equal to "c" of u
+//    ssize_t c1=-2;  // intermediate class
+    if (c<0) return c;
+
+    if (m_class[u] == c) {
+        x1 = findNearest(c, u, unc = true);
+        x2 = findNearest(c, u, inc = false, ext = true);
+    } else {
+        c2 = m_class[u];
+        if (c2 >=0 ) {
+            x1 = findNearest(c2, unc = true);
+            x2 = findNearest(c, u);
+        } else { // u is non classified
+            x1 = findNearest(c, u, ext = true, unc = true);
+            size_t x21 = findNearest(c, u);
+            size_t x22 = findNearest(c, u, inc=false, ext=true);
+            size_t x21 = get(x21,x22, u, minimal=false);  // index!
+            size_t x22 = findNearest(c, u, inc=false, unc=true);
+            x2 = get(x21,x22,u);
+        }
+    }
+    // found x1, x2
+    cout << "x2:" << x2<< endl;
+    for (size_t row=0; row<h; row++) {
+        if (m_class[row]==c) {
+            double f = fun(x2,row,u);       // rFun(row,u); !!! сначала конкурирующий, потом "свой"
+            cout<<"c["<<row<<"]="<<f<<endl; // выводить для проверки
+            s=s+f;
+            t++;
+        }
+    }
+    cout << "s:" << s << endl;
+    s=s/t;
+    cout <<"t:" << t << endl;
+    return s;
+}
+
+ssize_t FRIS::stolp(ssize_t c){ //найти средее функции конкурентного сходства
+    ssize_t s = -1;
+    double m = -2;
+
+    if (c<0) return c;
+
+    for (size_t row=0; row<h; row++) {
+        if (m_class[row]==c) {
+            double a = mean(c, row); // calc Favg(c, row,...)
+            if (a>m) {
+                m = a;
+                s = row;
+            }
+        }
+    }
+    return s;
 }
 
 bool FRIS::calculate() {
@@ -110,12 +216,45 @@ bool FRIS::calculate() {
     return true;
 };
 
+void FRIS::stolps(size_t maxNumber) {
+    vector<size_t> vis; //..ited
+    vector<size_t> viss; // .. numbers of stolps
+    for (size_t row=0; row<h; row++ ) {
+        ssize_t s = -1;
+        ssize_t c = m_class[row];
+        if (c<0) goto again;
+        for (size_t ind=0; ind<vis.size(); ind++) {
+            if (vis[ind]==c) {
+                s = viss[ind];
+                goto again;
+            }
+        }
+
+        s = stolp(c);
+
+        again:
+        m_stolps.push_back(s);
+    }
+}
 
 void FRIS::test1() {
     setlocale(LC_ALL,"Russian");
     wcout <<"Result"<<endl;
-    cout << "f=";
-    cout<<fun(3,4,2)<<endl;
+    /*if (fun(3,4,2)>0){
+    cout<<"u принаджежит первому образу"<< endl;
+    } else{ if(fun(3,4,2)==0){
+        cout<<"дистанции равны"<< endl;
+    }else{
+        cout<<"u принаджежит второму образу"<< endl;
+    }
+    }
+    cout<< "f=";
+    cout<<fun(3,4,2)<<endl;*/
+    cout<<"rF= "<<rFun(3,13)<<endl;
+    cout<< "f среднее:" <<endl;
+    cout<< mean(0,2)<<endl;
+    //cout<< mean(1,3)<<endl;
+    //cout<< mean(0,3)<<endl;
 }
 
 bool FRIS::loadData(string filename) {
@@ -125,13 +264,11 @@ bool FRIS::loadData(string filename) {
     // istream inp(filename);
 
     std::string line;
-    // std::ifstream in("C:\\fris\\fristdr\\R\\new.csv");
-    //std::ifstream in("C:\\fris\\fristdr\\R\\data4.txt");
     ifstream in(filename);
     if (in.is_open()){
         size_t i=0;
         while (getline(in, line)) {
-            std::cout << "DBG:" << line << std::endl;
+            //std::cout << "DBG:" << line << std::endl;
             istringstream sti(line);
             size_t col = 0;
             while (true){
@@ -160,11 +297,9 @@ bool FRIS::loadData(string filename) {
                         vector<double> v;
                         v.push_back(num);
                         m_frame.push_back(v);
-                        //i=v.size();
                     }
                 }
                 col++;
-                //i++;
             }
         }
         h=i;
@@ -177,15 +312,21 @@ bool FRIS::loadData(string filename) {
 };
 
 void FRIS::printFrame(ostream& out) {
-    out << "file open:" << endl;
+    out << "Frame:" << endl;
     size_t i = 0;
     while(true) {
+        out<<i<<"\t";
+        if (i<m_stolps.size()) {
+            out<<m_stolps[i]<<"\t";
+        } else {
+            out<<"-\t";
+        }
         out<<m_class[i]<<"\t";
         for (vector<double> v: m_frame) {
                 if (v.size()<=i) goto end;
                 double d = v[i];
                 out<<d<<"\t";
-            }
+        }
             out<<endl;
         i++;
     }
@@ -198,7 +339,6 @@ bool FRIS::outResult(ostream& stream) {
     stream<<"Hello world"<<endl;
     return true;
 };
-
 
 Matrix::Matrix(size_t rows, size_t cols)
     : mRows(rows),
@@ -213,15 +353,14 @@ double& Matrix::operator()(size_t i, size_t j) {
     assert(i<mRows);
     assert(j>=0);
     assert(j<mCols);
-    //cout << "MATR:" << mCols << " " << mRows << endl;
     return mData[i * mCols + j];
 }
 
 double Matrix::operator()(size_t i, size_t j) const {
-    //assert(i>=0);
-    //assert(i<mRows);
-    //assert(j>=0);
-    //assert(j<mCols);
+    assert(i>=0);
+    assert(i<mRows);
+    assert(j>=0);
+    assert(j<mCols);
     return mData[i * mCols + j];
 }
 
