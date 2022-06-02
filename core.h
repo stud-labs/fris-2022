@@ -53,7 +53,7 @@ private:
     size_t h=0, w=0;
 private:
     // By definition it is Euler distance
-    virtual double diss(vector<double> o1, vector<double> o2);
+  virtual double diss(size_t row1, size_t row2);
 public:
     void test1();
     //void stolps(size_t maxNumber = 10);

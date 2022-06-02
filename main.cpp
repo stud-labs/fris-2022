@@ -1,7 +1,9 @@
 #include <iostream>
 #include "core.h"
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 #include <thread>  //ïîòîêè
 #include <chrono>  //âðåìÿ
 
@@ -14,6 +16,12 @@ using namespace std;
 int main()
 {
     FRIS f;
+#ifdef _OPENMP
+    cout << "No of cores:" << omp_get_num_procs() << endl;
+#else
+    cout << "Sequential algorithm used\n";
+#endif
+
     cout << "Loading data\n";
     f.loadData(FILENAME);
     cout << "Frame loaded\n";
@@ -22,7 +30,6 @@ int main()
     f.calculate();
     cout << "Print result\n";
     cout << "\nfrisClus:" <<f.frisClus(1,0,13)<<endl;
-    .test1();
     f.stolps(2);
     f.printFrame(cout);
     cout << "\nmixmean = " << f.meanmix()<<endl;

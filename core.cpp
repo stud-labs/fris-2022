@@ -29,12 +29,12 @@ double FRIS::rFun(size_t x1, size_t u){ // функция конкурентного сходства по нек
       return f;
 }
 
-double FRIS::diss(vector<double> o1, vector<double> o2) { //вычисление дистанции между точками
+double FRIS::diss(size_t row1, size_t row2) { //вычисление дистанции между точками
     double s=0;
     //int n = omp_get_num_threads();
     #pragma omp parallel for
-    for (size_t col=0; col<o1.size(); col++) {
-            double d = (o1[col]-o2[col]);
+    for (size_t col=0; col<m_frame.size(); col++) {
+            double d = (m_frame[col][row1]-m_frame[col][row2]);
             s+=d*d;
     }
     return sqrt(s);
@@ -49,17 +49,14 @@ bool FRIS::calcdiss() {
     // cout<<v.size();
     m_diss = new Matrix(h,h);
 
-    for (size_t row=0;row<h; row++) {         //по ряду
-        for (size_t col=0;col<h; col++) {     //по колонке
-            vector<double> row1;
-            vector<double> row2;
-            for (size_t c=0;c<w;c++) {
-               row1.push_back(m_frame[c][row]);
-               row2.push_back(m_frame[c][col]);
-            }
-            double d = diss(row1,row2);       // заполнение матрицы
+    (*m_diss)(0, 0)=0;
+    for (size_t row=1; row<h; row++) {         //по ряду
+        (*m_diss)(row, row)=0;
+        for (size_t col=0; col < row-1; col++) {     //по колонке
+            double d = diss(row,col);       // заполнение матрицы
             //m_diss->mData[row*m_diss->mCols+col] = d;
-            (*m_diss)(row,col)=diss(row1,row2);
+            (*m_diss)(row, col)=d;
+            (*m_diss)(col, row)=d;
         }
     }
      m_diss->print(cout);

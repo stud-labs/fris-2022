@@ -11,8 +11,15 @@ compile: fris
 fris: $(SRC) $(HDR)
 	$(GPP) -o $@ $(SRC)
 
+compile-omp: $(SRC) $(HDR)
+	$(GPP) -o fris-omp -fopenmp $(SRC)
+
 run: compile
 	./fris
 
 debug: compile
 	gdb ./fris
+
+
+omp: compile-omp
+	./fris-omp
