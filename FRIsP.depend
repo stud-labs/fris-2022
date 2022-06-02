@@ -19,16 +19,19 @@
 	<iostream>
 	"core.h"
 
-1653479809 source:c:\users\Сеть-Техники\downloads\fris-2022-70f930836c4436d97437e08f365182b160f159c9\main.cpp
+1654161714 source:c:\users\Сеть-Техники\downloads\fris-2022-70f930836c4436d97437e08f365182b160f159c9\main.cpp
 	<iostream>
 	"core.h"
+	<omp.h>
+	<thread>
+	<chrono>
 
-1653703368 c:\users\Сеть-Техники\downloads\fris-2022-70f930836c4436d97437e08f365182b160f159c9\core.h
+1653891974 c:\users\Сеть-Техники\downloads\fris-2022-70f930836c4436d97437e08f365182b160f159c9\core.h
 	<string>
 	<iostream>
 	<vector>
 
-1653541759 source:c:\users\Сеть-Техники\downloads\fris-2022-70f930836c4436d97437e08f365182b160f159c9\core.cpp
+1654143106 source:c:\users\Сеть-Техники\downloads\fris-2022-70f930836c4436d97437e08f365182b160f159c9\core.cpp
 	"core.h"
 	<iostream>
 	<fstream>
@@ -38,4 +41,7 @@
 	<assert.h>
 	<math.h>
 	<stdlib.h>
+	<omp.h>
+	<thread>
+	<chrono>
 

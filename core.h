@@ -30,19 +30,22 @@ public:
     double fun(size_t x,size_t x1,size_t u); //fris
     double rFun(size_t x1, size_t u);        // ред fris
     double frisClus(ssize_t c1, ssize_t c2, size_t u);
-    double mean(ssize_t c, size_t u);        // среднее fris, для классифицированной выборки
+    void stolps(size_t maxNumber);
+    double meanmix();
 
 protected:
     bool calcdiss();
-    ssize_t get(size_t a, size_t b, size_t u, bool minimal=true);
-
-    ssize_t findNearest(size_t c, size_t u, bool inc=true, bool ext = false, bool unc = false);
+    //ssize_t get(size_t a, size_t b, size_t u, bool minimal=true);
+      ssize_t get(size_t a, size_t b, size_t u, bool minimal);
+    //ssize_t findNearest(size_t c, size_t u, bool inc=true, bool ext = false, bool unc = false);
+    ssize_t findNearest(size_t c, size_t u, bool inc, bool ext, bool unc);
     ssize_t stolp(ssize_t c);
+    double mean(ssize_t c, size_t u); // среднее fris, для классифицированной выборки
 private:
     // vector<double> m_v;
     vector<vector<double>> m_frame;
     vector<ssize_t> m_class;
-    vector<size_t> m_stolps;
+    vector<ssize_t> m_stolps;
     Matrix * m_diss = nullptr;
 public:
     ~FRIS();
@@ -53,7 +56,7 @@ private:
     virtual double diss(vector<double> o1, vector<double> o2);
 public:
     void test1();
-    void stolps(size_t maxNumber = 10);
+    //void stolps(size_t maxNumber = 10);
 };
 
 #endif // __CORE_H__
