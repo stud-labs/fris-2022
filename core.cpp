@@ -42,10 +42,10 @@ double FRIS::diss(size_t row1, size_t row2) { //вычисление дистанции между точка
 
 bool FRIS::calcdiss() {
     assert(w>0);
-    cout << "h:";
-    cout<<h<<endl;
-    cout << "w:";
-    cout<<w<<endl;
+    // cout << "h:";
+    // cout<<h<<endl;
+    // cout << "w:";
+    // cout<<w<<endl;
     // cout<<v.size();
     m_diss = new Matrix(h,h);
 
@@ -59,7 +59,7 @@ bool FRIS::calcdiss() {
             (*m_diss)(col, row)=d;
         }
     }
-     m_diss->print(cout);
+    // m_diss->print(cout);
     // comment
     return true;
 }
@@ -127,8 +127,8 @@ double FRIS::frisClus(ssize_t c1, ssize_t c2, size_t u) {
   //                              inc    ext   unknown
   ssize_t x1 = findNearest(c1, u, true, false, false);
   ssize_t x2 = findNearest(c2, u, true, false, false);
-  cout << "1c["<<x1<<"]="<<m_class[x1]<<"="<<c1<<endl;
-  cout << "2c["<<x2<<"]="<<m_class[x2]<<"="<<c2<<endl;
+  // cout << "1c["<<x1<<"]="<<m_class[x1]<<"="<<c1<<endl;
+  // cout << "2c["<<x2<<"]="<<m_class[x2]<<"="<<c2<<endl;
   // double r1 = min((*m_diss)(x1,u),(*m_diss)(x2,u)); // r1 для алгоритма
   // cout << "min diss r1 ="<<r1<<endl;
   // cout << "f(x1,x2,u)=";
@@ -164,10 +164,10 @@ double FRIS::meanmix(){
         //sum = sum+fun(row,x2,u);
         sum = sum+fun(u2,u1,row); // сначала конкурирующий потом свой
         t++;
-        cout<< "\n c1["<<c1<<"]="<<u1<<endl;
-        cout<< "x2:"<<x2<<endl;
-        cout<< "c2["<<c2<<"]="<<u2<<endl;
-        cout<< "sum:"<<sum<<endl;
+        // cout<< "\n c1["<<c1<<"]="<<u1<<endl;
+        // cout<< "x2:"<<x2<<endl;
+        // cout<< "c2["<<c2<<"]="<<u2<<endl;
+        // cout<< "sum:"<<sum<<endl;
     }
     cout<< "\nt:"<<t<<endl;
     return sum/t;
@@ -355,8 +355,8 @@ void FRIS::printFrame(ostream& out) {
 }
 
 bool FRIS::outResult(ostream& stream) {
-    stream<<"Hello world"<<endl;
-    return true;
+  // stream<<"Hello world"<<endl;
+  return true;
 };
 
 Matrix::Matrix(size_t rows, size_t cols)
