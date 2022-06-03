@@ -4,8 +4,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-#include <thread>  //ïîòîêè
-#include <chrono>  //âðåìÿ
+
 #include <unistd.h>
 
 // #define FILENAME "C:\\fris\\fristdr\\R\\data4.txt"
@@ -32,15 +31,15 @@ int main()
     f.calculate();
     // cout << "Print result\n";
     // cout << "\nfrisClus:" <<f.frisClus(1,0,13)<<endl;
-    f.stolps(2);
-    // f.printFrame(cout);
+    f.stolps(3);
+    //f.printFrame(cout);
     cout << "\nmixmean = " << f.meanmix()<<endl;
-    f.outResult(cout);
+    //f.outResult(cout);
     // exit(0);
-    /*#pragma omp parallel
-    {
-    cout << "\nOpenMP Test" << endl; //îäèí ïîòîê??
-    }
-    */
+    //#pragma omp parallel
+    //{
+    //cout << "\nOpenMP Test" << endl; //îäèí ïîòîê??
+    //}
+
     return 0;
 }

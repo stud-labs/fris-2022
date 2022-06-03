@@ -7,11 +7,10 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+
+#ifdef _OPENMP
 #include <omp.h>
-#include <thread>  //потоки
-#include <chrono>  //время
-
-
+#endif
 
 using namespace std;
 
@@ -50,7 +49,7 @@ bool FRIS::calcdiss() {
     m_diss = new Matrix(h,h);
 
     (*m_diss)(0, 0)=0;
-    for (size_t row=1; row<h; row++) {         //по ряду
+    for (size_t row=1; row<h; row++) {               //по ряду
         (*m_diss)(row, row)=0;
         for (size_t col=0; col < row-1; col++) {     //по колонке
             double d = diss(row,col);       // заполнение матрицы
@@ -89,8 +88,6 @@ void search_t::update(double d, size_t row) {
         }
     }
 }
-
-
 
 ssize_t FRIS::findNearest(size_t c, size_t u, bool inc, bool ext, bool unc) {
     // c>=0 ищет элемент с минимальной дистанцией до u в классе с (not=false, unc=false) ИЛИ
@@ -155,19 +152,18 @@ double FRIS::meanmix(){
     int t=0;
     double sum;
     for (size_t row=0; row<h; row++) {
-        c1=m_class[row];
-        u1=stolp(c1);
-        //x2 = findNearest(c,u,true,true,true); // не правильно, берет сам столп!!! --исправлено --не правильно, нужен ближайший столп из другого класса
+        c1= m_class[row];
+        u1= m_stolps[row];
         x2 = findNearest(c1,u1,false,true,true);
         c2 = m_class[x2];
         u2 = stolp(c2);
-        //sum = sum+fun(row,x2,u);
+        u2 = m_stolps[x2];
         sum = sum+fun(u2,u1,row); // сначала конкурирующий потом свой
         t++;
-        // cout<< "\n c1["<<c1<<"]="<<u1<<endl;
-        // cout<< "x2:"<<x2<<endl;
-        // cout<< "c2["<<c2<<"]="<<u2<<endl;
-        // cout<< "sum:"<<sum<<endl;
+        //cout<< "\n c1["<<c1<<"]="<<u1<<endl;
+        //cout<< "x2:"<<x2<<endl;
+        //cout<< "c2["<<c2<<"]="<<u2<<endl;
+        //cout<< "sum:"<<sum<<endl;
     }
     cout<< "\nt:"<<t<<endl;
     return sum/t;
@@ -206,7 +202,7 @@ double FRIS::mean(ssize_t c, size_t u){ // среднее значение FRIS
     //cout << "x2:" << x2<< endl;
     for (size_t row=0; row<h; row++) {
         if (m_class[row]==c) {
-            double f = fun(x2,row,u);       // rFun(row,u); !!! сначала конкурирующий, потом "свой"
+            double f = fun(x2,row,u);         // rFun(row,u); !!! сначала конкурирующий, потом "свой"
            // cout<<"c["<<row<<"]="<<f<<endl; // выводить для проверки
             s=s+f;
             t++;
@@ -218,7 +214,7 @@ double FRIS::mean(ssize_t c, size_t u){ // среднее значение FRIS
     return s;
 }
 
-ssize_t FRIS::stolp(ssize_t c){ //найти средее функции конку*96рентного сходства
+ssize_t FRIS::stolp(ssize_t c){ //найти средее функции конкурентного сходства
     ssize_t s = -1;
     double m = -2;
 
@@ -242,24 +238,43 @@ bool FRIS::calculate() {
 };
 
 void FRIS::stolps(size_t maxNumber) {
-    vector<size_t> vis; //..ited
-    vector<size_t> viss; // .. numbers of stolps
-    for (size_t row=0; row<h; row++ ) {
-        ssize_t s = -1;
-        ssize_t c = m_class[row];
-        if (c<0) goto again;
-        for (size_t ind=0; ind<vis.size(); ind++) {
-            if (vis[ind]==c) {
-                s = viss[ind];
-                goto again;
-            }
-        }
-
+  vector<size_t> vis; //..ited
+  vector<size_t> viss; // .. numbers of stolps
+  // OMP from here
+  #pragma omp parallel
+  {
+  m_stolps.resize(h, -1);
+  for (size_t row=0; row<h; row++ ) {
+    if (m_stolps[row]>=0) continue;
+    ssize_t s = -1;
+    ssize_t c = m_class[row];
+    if (c<0) goto again;
+    // c>=0
+    size_t ve;
+    for (size_t ind=0; ind<vis.size(); ind++) {
+      if (vis[ind]==c) {
+        s = viss[ind];
+        goto again;
+      }
+    }
+    // Crit section
+    vis.push_back(c);
+    viss.push_back(s);
+    ve = viss.size()-1;
+    //
         s = stolp(c);
 
-        again:
-        m_stolps.push_back(s);
-    }
+    // Crit section
+    viss[ve] = s;
+    //
+
+
+  again:
+    //
+    m_stolps[row] = s;
+    //
+  }
+  }
 }
 
 void FRIS::test1() {
