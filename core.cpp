@@ -10,7 +10,9 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+#include <thread>  //потоки
 #endif
+#include <chrono>  //время
 
 using namespace std;
 
@@ -257,12 +259,14 @@ void FRIS::stolps(size_t maxNumber) {
         goto again;
       }
     }
+
     // Crit section
     vis.push_back(c);
     viss.push_back(s);
     ve = viss.size()-1;
     //
-        s = stolp(c);
+
+    s = stolp(c);
 
     // Crit section
     viss[ve] = s;
@@ -276,6 +280,8 @@ void FRIS::stolps(size_t maxNumber) {
   }
   }
 }
+
+
 
 void FRIS::test1() {
     setlocale(LC_ALL,"Russian");
