@@ -7,7 +7,11 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+
+#ifdef _OPENMP
 #include <omp.h>
+#endif
+
 #include <thread>  //потоки
 #include <chrono>  //время
 
@@ -242,25 +246,45 @@ bool FRIS::calculate() {
 };
 
 void FRIS::stolps(size_t maxNumber) {
-    vector<size_t> vis; //..ited
-    vector<size_t> viss; // .. numbers of stolps
-    for (size_t row=0; row<h; row++ ) {
-        ssize_t s = -1;
-        ssize_t c = m_class[row];
-        if (c<0) goto again;
-        for (size_t ind=0; ind<vis.size(); ind++) {
-            if (vis[ind]==c) {
-                s = viss[ind];
-                goto again;
-            }
-        }
-
-        s = stolp(c);
-
-        again:
-        m_stolps.push_back(s);
+  vector<size_t> vis; //..ited
+  vector<size_t> viss; // .. numbers of stolps
+  // OMP from here
+  m_stolps.resize(h, -1);
+  for (size_t row=0; row<h; row++ ) {
+    if (m_stolps[row]>=0) continue;
+    ssize_t s = -1;
+    ssize_t c = m_class[row];
+    if (c<0) goto again;
+    // c>=0
+    size_t ve;
+    for (size_t ind=0; ind<vis.size(); ind++) {
+      if (vis[ind]==c) {
+        s = viss[ind];
+        goto again;
+      }
     }
+
+    // Crit section
+    vis.push_back(c);
+    viss.push_back(s);
+    ve = viss.size()-1;
+    //
+
+    s = stolp(c);
+
+    // Crit section
+    viss[ve] = s;
+    //
+
+
+  again:
+    //
+    m_stolps[row] = s;
+    //
+  }
 }
+
+
 
 void FRIS::test1() {
     setlocale(LC_ALL,"Russian");
