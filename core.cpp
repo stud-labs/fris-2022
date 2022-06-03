@@ -243,9 +243,9 @@ void FRIS::stolps(size_t maxNumber) {
   vector<size_t> vis; //..ited
   vector<size_t> viss; // .. numbers of stolps
   // OMP from here
+  m_stolps.resize(h, -1);
   #pragma omp parallel
   {
-  m_stolps.resize(h, -1);
   for (size_t row=0; row<h; row++ ) {
     if (m_stolps[row]>=0) continue;
     ssize_t s = -1;
