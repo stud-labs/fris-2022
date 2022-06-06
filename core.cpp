@@ -39,12 +39,12 @@ double FRIS::diss(size_t row1, size_t row2) { //вычисление дистанции между точка
     //#pragma omp parallel for schedule(static, m_frame.size() / omp_get_num_procs())
     //устанавливаем статическое планирование распределения итераций по потокам (делим общее число итераций на потоки),
     //каждый поток будет выполнять примерно одинаковое количество итераций
-    //#pragma omp parallel for //ordered schedule(dynamic) // замедляет программу
+    // #pragma omp parallel for //ordered schedule(dynamic) // замедляет программу
         for (size_t col=0; col<m_frame.size(); col++) {
             double d = (m_frame[col][row1]- m_frame[col][row2]);
             //#pragma omp ordered
             s+=d*d;
-    }
+        }
     return sqrt(s);
 }
 

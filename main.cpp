@@ -10,7 +10,8 @@
 //#define FILENAME "C:\\fris\\fristdr\\R\\data4.txt"6
 //#define FILENAME "./data4.txt"
 //#define FILENAME "./data5.txt"
-#define FILENAME "./data7.txt"
+//#define FILENAME "./data7.txt"
+#define FILENAME "./data88.txt"
 
 using namespace std;
 
