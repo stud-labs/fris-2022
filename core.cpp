@@ -1,3 +1,4 @@
+//-fexceptions -флаг из настроек
 #include "core.h"
 #include <iostream>
 #include <fstream>
@@ -10,7 +11,10 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+#include <thread>
 #endif
+
+#include <chrono>
 
 using namespace std;
 
@@ -30,14 +34,20 @@ double FRIS::rFun(size_t x1, size_t u){ // функция конкурентного сходства по нек
 
 double FRIS::diss(size_t row1, size_t row2) { //вычисление дистанции между точками
     double s=0;
+    //omp_set_num_threads(omp_get_num_procs()); //устанавливаем количество потоков равным количеству доступных процессоров в системе
     //int n = omp_get_num_threads();
-    #pragma omp parallel for
-    for (size_t col=0; col<m_frame.size(); col++) {
-            double d = (m_frame[col][row1]-m_frame[col][row2]);
+    //#pragma omp parallel for schedule(static, m_frame.size() / omp_get_num_procs())
+    //устанавливаем статическое планирование распределения итераций по потокам (делим общее число итераций на потоки),
+    //каждый поток будет выполнять примерно одинаковое количество итераций
+    //#pragma omp parallel for //ordered schedule(dynamic) // замедляет программу
+        for (size_t col=0; col<m_frame.size(); col++) {
+            double d = (m_frame[col][row1]- m_frame[col][row2]);
+            //#pragma omp ordered
             s+=d*d;
     }
     return sqrt(s);
 }
+
 
 bool FRIS::calcdiss() {
     assert(w>0);
@@ -156,7 +166,7 @@ double FRIS::meanmix(){
         u1= m_stolps[row];
         x2 = findNearest(c1,u1,false,true,true);
         c2 = m_class[x2];
-        u2 = stolp(c2);
+        //u2 = stolp(c2);
         u2 = m_stolps[x2];
         sum = sum+fun(u2,u1,row); // сначала конкурирующий потом свой
         t++;
@@ -238,51 +248,59 @@ bool FRIS::calculate() {
 };
 
 void FRIS::stolps(size_t maxNumber) {
-  vector<size_t> vis; //..ited
-  vector<size_t> viss; // .. numbers of stolps
-  // OMP from here
-  #pragma omp parallel
-  {
-  m_stolps.resize(h, -1);
-  for (size_t row=0; row<h; row++ ) {
-    if (m_stolps[row]>=0) continue;
-    ssize_t s = -1;
-    ssize_t c = m_class[row];
-    if (c<0) goto again;
-    // c>=0
-    size_t ve;
-    for (size_t ind=0; ind<vis.size(); ind++) {
-      if (vis[ind]==c) {
-        s = viss[ind];
-        goto again;
-      }
+   vector<size_t> vis; //..ited
+   vector<size_t> viss; // .. numbers of stolps
+   // OMP from here
+   m_stolps.resize(h, -1);
+   #pragma omp parallel
+   {
+   for (size_t row=0; row<h; row++ ) {
+     if (m_stolps[row]>=0) continue;
+     ssize_t s = -1;
+     ssize_t c = m_class[row];
+     if (c<0) goto again;
+     // c>=0
+     size_t ve;
+     for (size_t ind=0; ind<vis.size(); ind++) {
+       if (vis[ind]==c) {
+         s = viss[ind];
+         goto again;
+       }
+     }
+     // Crit section
+     #pragma omp critical
+     {
+     vis.push_back(c);
+     viss.push_back(s);
+     ve = viss.size()-1;
+     }
+     //
+     s = stolp(c);
+
+     // Crit section
+     #pragma omp critical
+     {
+     viss[ve] = s;
+     }
+     //
+
+     again:
+     //
+     #pragma omp critical
+     {
+     m_stolps[row] = s;
+     }
+     //
     }
-    // Crit section
-    vis.push_back(c);
-    viss.push_back(s);
-    ve = viss.size()-1;
-    //
-        s = stolp(c);
-
-    // Crit section
-    viss[ve] = s;
-    //
-
-
-  again:
-    //
-    m_stolps[row] = s;
-    //
-  }
   }
 }
 
 void FRIS::test1() {
     setlocale(LC_ALL,"Russian");
     wcout <<"Result"<<endl;
-  //  cout<< "f=";
-  //  cout<<fun(3,4,2)<<endl;*/
-  //  cout<<"rF= "<<rFun(3,13)<<endl;
+    //cout<< "f=";
+    //cout<<fun(3,4,2)<<endl;*/
+    //cout<<"rF= "<<rFun(3,13)<<endl;
     cout<< "f среднее:" <<endl;
     cout<< mean(0,2)<<endl;
 

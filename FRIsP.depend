@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1654261056 source:c:\fris\frisp\core.cpp
+1654470874 source:c:\fris\frisp\core.cpp
 	"core.h"
 	<iostream>
 	<fstream>
@@ -10,13 +10,15 @@
 	<math.h>
 	<stdlib.h>
 	<omp.h>
+	<thread>
+	<chrono>
 
 1654171204 c:\fris\frisp\core.h
 	<string>
 	<iostream>
 	<vector>
 
-1654260819 source:c:\fris\frisp\main.cpp
+1654483365 source:c:\fris\frisp\main.cpp
 	<iostream>
 	"core.h"
 	<omp.h>

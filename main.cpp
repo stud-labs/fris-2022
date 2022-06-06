@@ -7,10 +7,10 @@
 
 #include <unistd.h>
 
-// #define FILENAME "C:\\fris\\fristdr\\R\\data4.txt"
+//#define FILENAME "C:\\fris\\fristdr\\R\\data4.txt"6
 //#define FILENAME "./data4.txt"
 //#define FILENAME "./data5.txt"
-#define FILENAME "./data66.txt"
+#define FILENAME "./data7.txt"
 
 using namespace std;
 
@@ -36,10 +36,6 @@ int main()
     cout << "\nmixmean = " << f.meanmix()<<endl;
     //f.outResult(cout);
     // exit(0);
-    //#pragma omp parallel
-    //{
-    //cout << "\nOpenMP Test" << endl; //îäèí ïîòîê??
-    //}
 
     return 0;
 }
