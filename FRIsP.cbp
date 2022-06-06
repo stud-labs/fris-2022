@@ -22,6 +22,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-fopenmp" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -31,6 +32,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-fopenmp" />
 		</Compiler>
 		<Unit filename="core.cpp" />
 		<Unit filename="core.h" />
