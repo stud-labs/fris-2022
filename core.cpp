@@ -33,11 +33,16 @@ double FRIS::rFun(size_t x1, size_t u){ // функция конкурентного сходства по нек
 
 double FRIS::diss(size_t row1, size_t row2) { //вычисление дистанции между точками
     double s=0;
-    //#pragma omp parallel for
+    //omp_set_num_threads(omp_get_num_procs()); //устанавливаем количество потоков равным количеству доступных процессоров в системе
+    //int n = omp_get_num_threads();
+    //#pragma omp parallel for schedule(static, m_frame.size() / omp_get_num_procs())
+    //устанавливаем статическое планирование распределения итераций по потокам (делим общее число итераций на потоки),
+    //каждый поток будет выполнять примерно одинаковое количество итераций
+    // #pragma omp parallel for //ordered schedule(dynamic) // замедляет программу
         for (size_t col=0; col<m_frame.size(); col++) {
             double d = (m_frame[col][row1]- m_frame[col][row2]);
             s+=d*d;
-    }
+        }
     return sqrt(s);
 }
 
