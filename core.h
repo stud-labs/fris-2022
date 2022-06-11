@@ -32,6 +32,7 @@ public:
     double frisClus(ssize_t c1, ssize_t c2, size_t u);
     void stolps(size_t maxNumber);
     double meanmix();
+    size_t classification(size_t u);
 
 protected:
     bool calcdiss();
@@ -46,6 +47,8 @@ private:
     vector<vector<double>> m_frame;
     vector<ssize_t> m_class;
     vector<ssize_t> m_stolps;
+    vector<size_t> vis;
+    vector<size_t> viss;
     Matrix * m_diss = nullptr;
 public:
     ~FRIS();

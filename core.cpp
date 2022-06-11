@@ -241,8 +241,8 @@ bool FRIS::calculate() {
 };
 
 void FRIS::stolps(size_t maxNumber) {
-   vector<size_t> vis; //..ited
-   vector<size_t> viss; // .. numbers of stolps
+   //vector<size_t> vis; //..ited
+   //vector<size_t> viss; // .. numbers of stolps
    // OMP from here
    m_stolps.resize(h, -1);
    #pragma omp parallel
@@ -286,6 +286,27 @@ void FRIS::stolps(size_t maxNumber) {
      //
     }
   }
+}
+
+size_t FRIS::classification(size_t u){
+    ssize_t c= -1;
+    size_t x1= -1;
+    double d;
+    double k = viss.size();
+    double mind=100;
+
+    for (ssize_t ind=0; ind<vis.size(); ind++){
+            if (vis[ind]>0){
+            x1 = stolp(ind);
+            //cout <<x1<< endl;
+            //cout<< vis[ind]<<endl;
+            d = (*m_diss)(x1, u);
+            if(d<mind){
+            c = ind;
+            }
+            }}
+        //cout<<k<<endl;
+        return 0;
 }
 
 void FRIS::test1() {

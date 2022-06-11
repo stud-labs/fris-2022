@@ -36,6 +36,7 @@ int main()
     cout << "\nmixmean = " << f.meanmix()<<endl;
     //f.outResult(cout);
     // exit(0);
+    f.classification(4);
 
     return 0;
 }
