@@ -32,7 +32,7 @@ int main()
     // cout << "Print result\n";
     // cout << "\nfrisClus:" <<f.frisClus(1,0,13)<<endl;
     f.stolps(3);
-    //f.printFrame(cout);
+    f.printFrame(cout, 10);
     cout << "\nmixmean = " << f.meanmix()<<endl;
     //f.outResult(cout);
     // exit(0);

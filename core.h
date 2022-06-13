@@ -26,7 +26,7 @@ public:
     bool loadData(string filename);
     bool outResult(ostream& stream);
     bool calculate();
-    void printFrame(ostream& out);
+  void printFrame(ostream& out, size_t limit = 100);
     double fun(size_t x,size_t x1,size_t u); //fris
     double rFun(size_t x1, size_t u);        // ред fris
     double frisClus(ssize_t c1, ssize_t c2, size_t u);

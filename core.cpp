@@ -99,6 +99,8 @@ ssize_t FRIS::findNearest(size_t c, size_t u, bool inc, bool ext, bool unc) {
     // inc = true ищет в классе с
     // int t = 0; // считает кол-во элементов в классе
     search_t s;
+    assert(c>=0); // Class is defined, that is in c=0,1,2.....
+    assert(u>=0); // Row index of u must be > 0;
     for (size_t row=0; row<h; row++) {
         double d = (*m_diss)(u, row);
         if (inc) {
@@ -157,6 +159,7 @@ double FRIS::meanmix(){
     for (size_t row=0; row<h; row++) {
         c1= m_class[row];
         u1= m_stolps[row];
+        cout << "\n c1 "<<c1<<" u1 "<<u1<<endl;
         x2 = findNearest(c1,u1,false,true,true);
         c2 = m_class[x2];
         //u2 = stolp(c2);
@@ -297,7 +300,8 @@ size_t FRIS::classification(size_t u){
 
     for (ssize_t ind=0; ind<vis.size(); ind++){
             if (vis[ind]>0){
-            x1 = stolp(ind);
+            //x1 = stolp(ind);
+            x1 = viss[ind];
             //cout <<x1<< endl;
             //cout<< vis[ind]<<endl;
             d = (*m_diss)(x1, u);
@@ -376,9 +380,16 @@ bool FRIS::loadData(string filename) {
     return true;
 };
 
-void FRIS::printFrame(ostream& out) {
-    out << "Frame:" << endl;
+void FRIS::printFrame(ostream& out, size_t limit) {
+
+    out << "stolp indices:" << endl;
+    out << "#\tcls\tindex" << endl;
+    for (size_t j=0; j<vis.size(); j++) {
+      out << j << "\t" << vis[j] <<'\t' << viss[j] << endl;
+    };
+
     size_t i = 0;
+    out << "Frame:" << endl;
     out<<"#\tst\tcls\tdata\n";
     while(true) {
         out<<i<<"\t";
@@ -389,7 +400,7 @@ void FRIS::printFrame(ostream& out) {
         }
         out<<m_class[i]<<"\t";
         for (vector<double> v: m_frame) {
-                if (v.size()<=i) goto end;
+                if (v.size()<=i or limit<=i) goto end;
                 double d = v[i];
                 out<<d<<"\t";
         }
